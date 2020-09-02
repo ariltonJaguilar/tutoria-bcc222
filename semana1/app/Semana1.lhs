@@ -4,6 +4,8 @@ title: Exercícios para tutoria. Semana 1.
 date: Prof. Rodrigo Ribeiro
 ---
 
+> import Data.Char (isDigit, toLower, isLower)
+
 Introdução
 ==========
 
@@ -61,14 +63,18 @@ Com base no apresentado, faça o que se pede:
 a) Codifique a função
 
 > next :: Int -> Int
-> next = tODO
+> next n
+>    | (mod n 2) == 0 = div n 2
+>    | otherwise = 3*n+1
 
 que implementação da função f(n) apresentada anteriormente.
 
 b) Usando a definição de `next`, implemente a função
 
 > steps :: Int -> Int
-> steps = tODO
+> steps n
+>    | n == 1 = 1
+>    | otherwise = steps(next n)
 
 que retorna 1, caso o valor fornecido sobre entrada seja 1. Caso
 contrário, `steps` é chamada recursivamente sobre o resultado de
@@ -80,7 +86,11 @@ da função `steps` (item - b) de forma que esta retorne um par contendo o
 resultado de sua execução e o número de chamadas recursivas realizadas.
 
 > stepsCounter :: Int -> (Int,Int)
-> stepsCounter = tODO
+> stepsCounter n = aux n 0
+>    where 
+>        aux n x
+>          | n == 1 = (n , x)
+>          | otherwise = aux (next n) (x+1)
 
 Como convenção, considere que o primeiro componente do par retornado
 armazena o resultado da função e o segundo o número de chamadas
@@ -92,8 +102,11 @@ função retorne a sequência númerica gerada por chamadas recursivas até
 obtero resultado final, o número 1.
 
 > stepsList :: Int -> ([Int],Int)
-> stepsList = tODO
-
+> stepsList n = aux (n:[]) 0
+>    where 
+>        aux ns x
+>          | last ns == 1 = (ns , x)
+>          | otherwise = aux (ns ++ [next (last ns)]) (x+1)
 
 Exercício 2
 -----------
@@ -112,15 +125,19 @@ $$
 
 a) Implemente o algoritmo para cálculo do máximo divisor comum em Haskell:
 
-> gcd :: Int -> Int -> Int
-> gcd = tODO
+> gcd' :: Int -> Int -> Int
+> gcd' a 0 = a
+> gcd' a b = gcd' b (mod a b)
+
 
 b) Modifque a implementação da função `gcd` de forma a retornar o número
 de chamadas recursivas realizadas.
 
 > gcdCounter :: Int -> Int -> (Int, Int)
-> gcdCounter = tODO
-
+> gcdCounter a b = aux a b 0
+>     where 
+>         aux a 0 c = (a, c)
+>         aux a b c = aux b (mod a b) (c+1)
 
 Método de Newton.
 =================
@@ -143,7 +160,7 @@ calcula a média de dois valores
 fornecidos como parâmetro.
 
 > average :: Double -> Double -> Double
-> average = tODO
+> average a b = (a+b)/2 
 
 Exercício 2
 -----------
@@ -157,8 +174,7 @@ Baseado nesse fato, implemente a função
 é boa o suficiente.
 
 > goodEnough :: Double -> Double -> Bool
-> goodEnough = tODO
-
+> goodEnough a b = abs((a**2) - b) < 0.001
 
 Exercício 3
 -----------
@@ -174,7 +190,9 @@ tentativa e do radicando retorna uma nova tentativa
 como resultado.
 
 > improve :: Double -> Double -> Double
-> improve = tODO
+> improve 0 b = b
+> improve a b = b/a
+
 
 Exercício 4
 -----------
@@ -184,7 +202,9 @@ método de Newton para cálculo da raiz quadrada de um número.
 Para isso, defina a função
 
 > sqrtIter :: Double -> Double -> Double
-> sqrtIter = tODO
+> sqrtIter a b 
+>      | goodEnough a b == True = a
+>      | otherwise = sqrtIter (average(improve (a) (b)) a) (b)
 
 que a partir de uma tentativa e do radicando, testa se a tentativa
 é atende a restrição de precisão (usando a função `goodEnough`). Caso
@@ -207,12 +227,131 @@ retorna uma aproximação para raiz cúbica do radicando considerando como
 tolerância o valor 0.0001.
 
 > cubicIter :: Double -> Double -> Double
-> cubicIter = tODO
+> cubicIter y x
+>     | abs((y**3) - x) < 0.0001 = y
+>     | otherwise = cubicIter (aproximation y x) (x)
+
+> aproximation :: Double -> Double -> Double
+> aproximation 0 x = x
+> aproximation y x = ((x/(y**2)) - (2*y))/3
+
 
 
 List comprehensions
 ===================
 
+Examples
+-----------
+
+Soma o quadrado de numeros impares da lista
+
+> example1 :: Int 
+> example1 = sum [x ^ 2 | x <- [1..20], odd x]
+
+Converter string para minusculo
+
+> toLowers :: String -> String
+> toLowers xs = [toLower c | c <- xs]
+
+> selectDigits :: String -> String
+> selectDigits xs = [c | c <- xs, isDigit c]
+
+Produt cartesiano de listas   
+
+> (.*.) :: [a] -> [b] -> [(a,b)]
+> xs .*. ys = [(x,y) | x <- xs, y <- ys]
+
+Triplas pitagoricas
+(x,y,z) é pitagorica se x² == y² + z²
+
+> triples :: Int -> [(Int, Int, Int)]
+> triples n 
+>   = [(x,y,z) | x <- [1..n]
+>              , y <- [1..n]
+>              , z <- [1..n]
+>              , (x ^ 2) == (y ^ 2) + (z ^ 2)
+>   ]
+
+Gerando numeros primos dentro de um intervalo
+
+Determina primeiro os fatores 
+
+> factors :: Int -> [Int]
+> factors n = [x | x <- [1..n] , n `mod` x == 0]
+
+Verifica se é primo
+
+> prime :: Int -> Bool
+> prime n = factors n == [1,n]
+
+Numeros primos menores ou iguais a n
+
+> primes :: Int -> [Int]
+> primes m = [ x | x <- [1..m] , factors x == [1,x]]
+
+Dobrar os elementos de uma lista
+
+> doubleList :: [Int] -> [Int]
+> doubleList []         = []
+> doubleList (x : xs)   = 2 * x : doubleList xs
+
+Negar os bools de uma lista
+
+> notList :: [Bool] -> [Bool]
+> notList []            = []
+> notList (x : xs)      =  not x : notList xs
+
+Aplicar funcao em cada um dos elementos da lista (ORDEM SUPERIOR)
+
+> map' :: (a -> b) -> [a] -> [b]
+> map' _ []             = []
+> map' f (x : xs)        = f x : map' f xs 
+
+> doubleList' xs
+>  = map' double xs
+>     where 
+>         double x = 2 * x
+
+> notList' xs
+>   = map' negate xs
+>      where
+>        negate x = not x
+
+FIltrar uma lista
+
+Retornar Todos os Inteiros pares
+
+> evens :: [Int] -> [Int]
+> evens []          = []
+> evens (x : xs)
+>   | even x = x : evens xs
+>   | otherwise = evens xs
+
+Retornar todas as letras minusculas
+
+> lowers :: String -> String
+> lowers []             = []
+> lowers (x : xs)
+>   | isLower x = x : lowers xs
+>   | otherwise = lowers xs
+
+ORDEM SUPERIOR
+
+> filter' :: (a -> Bool) -> [a] -> [a]
+> filter' _ []              = []
+> filter' f (x : xs)
+>     | f x = x : filter' f xs
+>     | otherwise = filter' f xs
+
+> evens' = filter' even
+
+> lowers' = filter' isLower
+
+FUNÇÔES ANONIMAS
+
+> doubleAll :: [Int] -> [Int]
+> doubleAll xs = map (\ x -> 2 * x) xs
+      
 Exercício 1
 -----------
 
@@ -222,7 +361,7 @@ a soma dos quadrados dos primeiros `n` números inteiros, em que `n` é um
 parâmetro da função.
 
 > squareSum :: Int -> Int
-> squareSum = tODO
+> squareSum n = sum [ x ^ 2 | x <- [1..n]]
 
 Exercício 2
 -----------
@@ -232,7 +371,7 @@ uma lista de pares $(x,y)$ de números inteiros tais que $0\leq x \leq n$ e
 $0 \leq y \leq m$. Usando list comprehension, construa a função
 
 > grid :: Int -> Int -> [(Int,Int)]
-> grid = tODO
+> grid m n = [ (x, y) | x <- [0..n], y <- [0..m]] 
 
 que retorna um plano de coordenadas de acordo com a descrição apresentada.
 
@@ -248,6 +387,6 @@ $$
 em que $xs_k$ é o $k$-ésimo elemento da lista $xs$. Implemente a função
 
 > scalarProduct :: [Int] -> [Int] -> Int
-> scalarProduct = tODO
+> scalarProduct xs ys = sum [xsk * ysk | (xsk, ysk) <- zip xs ys] 
 
 que calcula o produto escalar de duas listas fornecidas como argumento.
