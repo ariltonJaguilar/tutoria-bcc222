@@ -103,7 +103,11 @@ a seguir:
         é uniforme se todos os seus elementos são iguais.
 
 > uniform :: [Float] -> Bool
-> uniform = tODO
+> uniform [] = True
+> uniform (x : []) = True
+> uniform (x : y : xs) 
+>         | x /= y = False
+>         | otherwise = uniform (x:xs)  
 
 Os seguintes casos de teste devem ser satisfeitos por sua implementação de `uniform`.
 
@@ -120,7 +124,11 @@ Os seguintes casos de teste devem ser satisfeitos por sua implementação de `un
      b) Usando a função `uniform`, escreva a função
 
 > valid :: Matrix -> Bool
-> valid = tODO
+> valid [] = False
+> valid (x:[]) = True
+> valid (x:y:xs) 
+>          | length x == length y = valid (y:xs)
+>          | otherwise = False
 
 que testa de uma matriz é válida ou não. Sua função deve passar nos seguintes casos de teste.
 
@@ -138,7 +146,8 @@ que testa de uma matriz é válida ou não. Sua função deve passar nos seguint
 2. Desenvolva a função
 
 > dimension :: Matrix -> (Int,Int)
-> dimension = tODO
+> dimension [] = (0,0)
+> dimension xs = (length xs, (length . head) xs)
 
 que retorna as dimensões (número de linhas e colunas) de uma dada matriz. Sua definição deve
 considerar que a dimensão de matrizes inválidas é definida como `(0,0)`.
@@ -156,7 +165,10 @@ Usando sua definição de `dimension`, implemente uma função que testa se uma 
 _Lembre-se_: Matrizes inválidas não são quadradas!
 
 > square :: Matrix -> Bool
-> square = tODO
+> square xs
+>     | dimension xs == (0,0) = False
+>     | (fst . dimension) xs == (snd . dimension) xs = True
+>     | otherwise = False
 
 > squareTests :: TestTree
 > squareTests
@@ -180,7 +192,11 @@ _Lembre-se_: Matrizes inválidas não são quadradas!
 3. Implemente a função
 
 > idMatrix :: Int -> Matrix
-> idMatrix = tODO
+> idMatrix n = [ [ f c l | c <- [1..n] ] | l <- [1..n] ]
+>          where
+>               f c l
+>                 | c == l = 1
+>                 | otherwise = 0
 
 que a partir de um inteiro positivo $n \geq 1$ gera a matriz identidade de dimensão $n \times n$.
 
@@ -212,7 +228,7 @@ zipWith f (x : xs) (y : ys) = f x y : zipWith f xs ys
 Apresente uma definição de `zipWith` em termos das funções `map`, `zip` e `uncurry`.
 
 > zipWith' ::  (a -> b -> c) -> [a] -> [b] -> [c]
-> zipWith' = tODO
+> zipWith' f a b = map (uncurry f) (zip a b)  
 
 5. Somar duas matrizes de mesma dimensão consiste em adicionar os elementos que ocorrem na mesma posição
 (i.e., mesma linha e mesma coluna) nas duas matrizes, para obter o elemento nessa posição na matriz
@@ -239,7 +255,7 @@ $$
      a)  Desenvolva a função
 
 > nullMatrix :: (Int,Int) -> Matrix
-> nullMatrix = tODO
+> nullMatrix (l,c)= [[0 | x <- take (fst(l,c))[0..]] | y <- take (snd (l,c)) [0..]]
 
          que produz uma matriz nula (com zeros em todas as posições) de dimensões 
          às fornecidas como parâmetros.
@@ -247,7 +263,7 @@ $$
      b) Defina a função
 
 > addRow :: [Float] -> [Float] -> [Float]
-> addRow = tODO
+> addRow xs ys= map (uncurry(+)) (zip xs ys)
 
         que soma duas linhas de uma matriz.
 
@@ -263,7 +279,9 @@ $$
         de duas matrizes.
 
 > (.+.) :: Matrix -> Matrix -> Matrix
-> _ .+. _ = tODO
+> xs .+. [] = xs
+> [] .+. ys = ys
+> xs .+. ys = zipWith addRow xs ys
 
 
         Sua implementação deve satisfazer os seguintes testes.
@@ -319,7 +337,7 @@ Com base no apresentado, faça o que se pede.
      a) Implemente a função
 
 > innerProduct :: [Float] -> [Float] -> Float
-> innerProduct = tODO
+> innerProduct xs ys = sum (zipWith (*) xs ys)
 
      que calcula o produto interno de dois vetores fornecidos como argumento.
      Sua função deve atender o seguinte caso de teste.
@@ -340,7 +358,14 @@ Com base no apresentado, faça o que se pede.
         não sejam apropriadas, você deverá retornar uma lista vazia.
 
 > (.*.) :: Matrix -> Matrix -> Matrix
-> _ .*. _ = tODO
+> [] .*. [] = []
+> xs .*. ys
+>         | length (head xs) == length ys = innerProduct (head xs) (secondVector ys)
+>         | otherwise = []
+>               where
+>                  secondVector []     = []
+>                  secondVector (y:ys) = [head y : secondVector ys]
+
 
 > prodMatrixTest :: TestTree
 > prodMatrixTest
