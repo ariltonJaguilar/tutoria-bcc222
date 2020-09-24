@@ -126,7 +126,15 @@ apresentam a solução passo a passo deste problema.
 das linhas que o formam.
 
 > lines :: Text -> [Line]
-> lines = tz
+> lines xs = aux xs
+>      where 
+>             aux "" = []
+>             aux xs = take (achaesc 0 xs) xs : aux (auxidiota xs)
+>                             where 
+>                                achaesc :: Int -> String -> Int
+>                                achaesc (n) "" = n
+>                                achaesc (n) (x:xs) = if (x == '\n') then n else achaesc (n+1) (xs)
+>                                auxidiota  xs = if (achaesc 0 xs) == (length xs) then "" else (drop ((achaesc 0 xs)+1) xs)
 
 Os seguintes casos de teste devem ser satisfeitos por sua implementação de `lines`.
 
@@ -145,7 +153,10 @@ Os seguintes casos de teste devem ser satisfeitos por sua implementação de `li
 número.
 
 > numberLines :: [Line] -> [(Int, Line)]
-> numberLines = tODO
+> numberLines xs = aux 1 xs
+>            where
+>                 aux n [] = []
+>                 aux n (x:xs) = (n , x) : aux (n+1) xs 
 
 Os seguintes casos de teste devem ser satisfeitos por sua implementação de `numberLines`.
 

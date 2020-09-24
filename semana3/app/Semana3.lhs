@@ -300,7 +300,6 @@ $$
 >   = QC.forAll matrixGen
 >               (\ m -> m .+. (nullMatrix (dimension m)) == m)
 
-
 6. Para implementação do produto de duas matrizes, vamos precisar da noção de produto interno,
 ou produto de dois vetores:
 
@@ -360,12 +359,13 @@ Com base no apresentado, faça o que se pede.
 > (.*.) :: Matrix -> Matrix -> Matrix
 > [] .*. [] = []
 > xs .*. ys
->         | length (head xs) == length ys = innerProduct (head xs) (secondVector ys)
+>         | length (head xs) == length ys = divFirst xs ys
 >         | otherwise = []
->               where
->                  secondVector []     = []
->                  secondVector (y:ys) = [head y : secondVector ys]
-
+>                   where 
+>                      divFirst [] _ = []
+>                      divFirst xs ys =  aux (head xs) ys : divFirst (tail xs) ys 
+>                      aux _ [] = []
+>                      aux xs ys = innerProduct xs ( head (transpose ys)) : aux (xs) (transpose (tail (transpose ys)))
 
 > prodMatrixTest :: TestTree
 > prodMatrixTest

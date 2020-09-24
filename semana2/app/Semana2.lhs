@@ -315,10 +315,7 @@ takeWhile p (x : xs)
 ~~~~~~~
 
 > takeWhile' :: (a -> Bool) -> [a] -> [a]
-> takeWhile' p
->    = foldr step []
->      where
->        step x xs = p x : xs
+> takeWhile' f = foldr (\x acc -> if f x then x : acc else []) []
 
 Evidentemente sua implementação deverá atender a seguinte propriedade de correção:
 
@@ -338,11 +335,10 @@ dropWhile p (x : xs)
 ~~~~~~
 
 > dropWhile' :: (a -> Bool) -> [a] -> [a]
-> dropWhile' p
->    = foldr step base
->      where
->        step = tODO
->        base = tODO
+> dropWhile' f
+>    = foldr  (\x acc -> if f x then [] else x : acc)  []
+
+
 
 
 
